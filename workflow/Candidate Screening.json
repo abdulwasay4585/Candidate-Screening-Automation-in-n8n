@@ -1,0 +1,600 @@
+{
+  "name": "Candidate Screening",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -48
+      ],
+      "id": "bd25a582-593d-407c-988b-535178387457",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "6uKbXgyT8pNAQhI7",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -464,
+        -48
+      ],
+      "id": "54a123c3-cd1f-4e18-bfb7-fa9c6f2e8357",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8bCQLXxnaiMmYrbf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cff95d95-89d6-401e-a4be-210666d0da7b",
+              "leftValue": "Name",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8376f8a6-c62d-4651-8f40-bd1a75355e81",
+              "leftValue": "Email",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ab9c8c97-6df8-424d-97a8-89332feb9fb5",
+              "leftValue": "Degree",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a2acf171-d2a3-49e3-831a-cac5656fdbe6",
+              "leftValue": "Skills",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "23bb87da-b101-4999-a884-bf795c74718e",
+              "leftValue": "Experience",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a0494467-91a7-4c5b-bb4d-419668a9e28b",
+              "leftValue": "Availability",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        -48
+      ],
+      "id": "7f2c3ebe-d77f-4859-b362-dad2d748e4da",
+      "name": "Validate Required Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const candidate = item.json;\n\n  const degree = (candidate.Degree || \"\").toLowerCase();\n  const skills = (candidate.Skills || \"\").toLowerCase();\n  const experience = Number(candidate.Experience || 0);\n  const availability = (candidate.Availability || \"\").toLowerCase();\n\n  let score = 0;\n\n  if ([\"bsai\", \"bscs\", \"bsse\"].some(d => degree.includes(d))) {\n    score += 30;\n  }\n\n  if (skills.includes(\"python\")) score += 20;\n  if (skills.includes(\"machine learning\")) score += 20;\n  if (skills.includes(\"deep learning\")) score += 20;\n  if (skills.includes(\"sql\")) score += 10;\n\n  if (experience >= 3) score += 20;\n  else if (experience >= 1) score += 10;\n\n  if (availability.includes(\"immediate\")) score += 10;\n\n  candidate.score = score;\n\n  return { json: candidate };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -224
+      ],
+      "id": "5fdda4ed-627d-45c5-a288-4502c6183768",
+      "name": "Apply Screening Rules"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const candidate = item.json;\n\n  if (candidate.score >= 80) {\n    candidate.category = \"Selected\";\n    candidate.status = \"Approved\";\n    candidate.remarks = \"Excellent Match\";\n  } else if (candidate.score >= 50) {\n    candidate.category = \"Review\";\n    candidate.status = \"Pending\";\n    candidate.remarks = \"Needs Manual Review\";\n  } else {\n    candidate.category = \"Rejected\";\n    candidate.status = \"Rejected\";\n    candidate.remarks = \"Below Requirements\";\n  }\n\n  return { json: candidate };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -176
+      ],
+      "id": "4e847ea4-b079-4877-bac1-4bc533e3d201",
+      "name": "Categorize Candidate"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14ZF20hVcP3DIBFtiWVqXCnRJyl0ybydUf2n9qMA5g1A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{$json.Email}}",
+            "Category": "={{$json.category}}",
+            "Status": "={{$json.status}}",
+            "Remarks": "={{$json.remarks}}",
+            "Name": "={{$json.Name}}",
+            "Degree": "={{$json.Degree}}",
+            "Skills": "={{$json.Skills}}",
+            "Experience": "={{$json.Experience}}",
+            "Availability": "={{$json.Availability}}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Degree",
+              "displayName": "Degree",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Skills",
+              "displayName": "Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Experience",
+              "displayName": "Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Availability",
+              "displayName": "Availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Remarks",
+              "displayName": "Remarks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -192
+      ],
+      "id": "db82d2f4-e559-4042-928f-241cc79cfc44",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8bCQLXxnaiMmYrbf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5030abb7-c16e-4fe3-87c4-cbc72e1b9518",
+              "leftValue": "={{$json.Category}}",
+              "rightValue": "Selected",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        -176
+      ],
+      "id": "c74c4a9d-6e5b-4c27-a28e-6d3f4c9fc5a1",
+      "name": "Selected"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a63dacfa-7e5f-4867-a03d-82e6cc1f7f43",
+              "leftValue": "={{$json.Category}}",
+              "rightValue": "Review",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        304,
+        16
+      ],
+      "id": "04b68309-7cfc-4771-9dfd-0d2fc23aeb55",
+      "name": "Review"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.Email}}",
+        "subject": "Congratulations! You have been shortlisted",
+        "message": "=Hi {{$json.Name}},  Congratulations!  You have successfully passed our initial screening process.  Our HR team will contact you shortly regarding the interview.  Best Regards, HR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -272
+      ],
+      "id": "d8434d89-afce-4cc6-ad80-9b50eac86d72",
+      "name": "Send a message",
+      "webhookId": "1606c6cc-72d4-4f65-bc6a-eaf1c779abf2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6xrLw3UwNe4C605A",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.Email}}",
+        "subject": "Application Under Review",
+        "message": "=Hi {{$json.Name}},\n\nThank you for applying.\n\nYour profile has passed the initial validation and is currently under manual review.\n\nWe will update you soon.\n\nRegards,\nHR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -80
+      ],
+      "id": "9fd8dd28-c8de-4789-bfc5-6b6d54da6ded",
+      "name": "Send a message1",
+      "webhookId": "1606c6cc-72d4-4f65-bc6a-eaf1c779abf2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6xrLw3UwNe4C605A",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.Email}}",
+        "subject": "Application Status",
+        "message": "=Hi {{$json.Name}},\n\nThank you for applying for this position.\n\nAfter reviewing your profile, we have decided not to move forward with your application at this time.\n\nWe appreciate your interest and wish you success in your future opportunities.\n\nRegards,\nHR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        128
+      ],
+      "id": "a645a9fc-1eab-40e5-8318-5cb3c2b3063f",
+      "name": "Send a message2",
+      "webhookId": "1606c6cc-72d4-4f65-bc6a-eaf1c779abf2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6xrLw3UwNe4C605A",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Validate Required Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Selected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Required Fields": {
+      "main": [
+        [
+          {
+            "node": "Apply Screening Rules",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Apply Screening Rules": {
+      "main": [
+        [
+          {
+            "node": "Categorize Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selected": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize Candidate": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6e7b4a1c-ee25-4a81-809e-09e605486a0b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8c3028a1c0fc5f3f25caf13c2d6f3c061df095f6fd4c013f38944527f2f2e590"
+  },
+  "nodeGroups": [],
+  "id": "TeR0KJ20vx5Ca9Ej",
+  "tags": []
+}
